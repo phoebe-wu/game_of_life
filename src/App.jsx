@@ -1,11 +1,12 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import patterns from "./patterns.json"
 import './App.css'
 
 function App() {
 
-    const ROWS = 50
-    const COLS = 50
+    const ROWS = 100
+    const COLS = 100
+    const CELL_SIZE = 10
 
     const directions = [
         [-1, -1], [-1, 0], [-1, 1],
@@ -43,8 +44,7 @@ function App() {
     const [grid, setGrid] = useState(populateGrid)
     const [running, setRunning] = useState(false)
     const [speed, setSpeed] = useState(100)
-
-
+    const canvasRef = useRef(null)
 
     const generateNextGrid = useCallback((g) => {
         return g.map((row, r) =>
@@ -87,9 +87,9 @@ function App() {
             if (e.code === "Space") {
                 toggleSimulation();
             } else if (e.code === "ArrowUp") {
-                setSpeed((prev) => (prev > 100 ? prev - 100 : 50));
+                setSpeed((prev) => (Math.max(prev - 50, 50)));
             } else if (e.code === "ArrowDown") {
-                setSpeed((prev) => (prev === 50 ? 100 : Math.min(prev + 100, 500)));
+                setSpeed((prev) => (Math.min(prev + 50, 500)));
             } else if (e.code === "KeyR") {
                 setRunning(false)
                 setGrid(populateGrid())
@@ -102,37 +102,38 @@ function App() {
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [])
 
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d')
+
+        canvas.width = COLS * CELL_SIZE
+        canvas.height = ROWS * CELL_SIZE
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        grid.forEach((row, r) =>
+            row.forEach((cell, c) => {
+                if (cell) {
+                    ctx.fillStyle = "#ccc"
+                    ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+                ctx.strokeStyle = "#333";
+                ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            })
+        );
+    }, [grid])
+
 
     return (
-        <div>
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${COLS}, 10px)`,
-                    marginTop: 20,
-                }}
-            >
-                {grid.map((rows, i) =>
-                    rows.map((col, j) => (
-                        <div
-                            key={`${i}-${j}`}
-                            onClick={() => {
-                                setRunning(false)
-                                const newGrid = [...grid];
-                                newGrid[i][j] = grid[i][j] ? 0 : 1;
-                                setGrid(newGrid);
-                            }}
-                            style={{
-                                width: 10,
-                                height: 10,
-                                backgroundColor: grid[i][j] ? "#ccc" : undefined,
-                                border: "solid 0.5px #ccc",
-                            }}
-                        />
-                    ))
-                )}
-            </div>
-            <> {speed} </>
+        <div style={{textAlign: "center"}}>
+            <canvas
+                ref={canvasRef}
+                width={COLS * CELL_SIZE}
+                height={ROWS * CELL_SIZE}
+                style={{marginTop: 20,}}
+            />
+            <div style={{marginTop: 10}}>Speed: {speed}ms</div>
         </div>
     );
 }
