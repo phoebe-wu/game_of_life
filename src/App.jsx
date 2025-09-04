@@ -4,9 +4,9 @@ import './App.css'
 
 function App() {
 
-    const ROWS = 100
-    const COLS = 100
-    const CELL_SIZE = 10
+    const MIN_ROWS = 20
+    const MIN_COLS = 20
+    const CELL_SIZE = 15
 
     const directions = [
         [-1, -1], [-1, 0], [-1, 1],
@@ -14,46 +14,54 @@ function App() {
         [1, -1], [1, 0], [1, 1]
     ]
 
-    const generateEmptyGrid = () => {
-        return Array.from({length: ROWS}, () => Array(COLS).fill(0))
-    }
+    const generateEmptyGrid = (rows, cols) =>
+        Array.from({ length: rows }, () => Array(cols).fill(0));
 
-    const populateGrid = useCallback(() => {
+    const getGridSize = (width, height) => ({
+        rows: Math.max(Math.floor(height / CELL_SIZE), MIN_ROWS),
+        cols: Math.max(Math.floor(width / CELL_SIZE), MIN_COLS),
+    });
+
+    const populateGrid = ((rows, cols) => {
         const patternKeys = Object.keys(patterns)
         const patternName = patternKeys[Math.floor(Math.random() * patternKeys.length)]
 
         console.log(patternName)
-
         const pattern = patterns[patternName]
-        const newGrid = generateEmptyGrid()
 
-        const centerR = Math.floor(ROWS / 2)
-        const centerC = Math.floor(COLS / 2)
+        const newGrid = generateEmptyGrid(rows, cols);
+
+        const centerR = Math.floor(rows / 2)
+        const centerC = Math.floor(cols / 2)
 
         pattern.forEach(([dr, dc]) => {
             const rr = centerR + dr
             const cc = centerC + dc
-            if (rr >= 0 && rr < ROWS && cc >= 0 && cc < COLS) {
+            if (rr >= 0 && rr < rows && cc >= 0 && cc < cols) {
                 newGrid[rr][cc] = 1;
             }
         });
 
         return newGrid
-    }, [])
+    })
 
-    const [grid, setGrid] = useState(populateGrid)
+    const [grid, setGrid] = useState(() => {
+        const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+        return populateGrid(rows, cols);
+    });
     const [running, setRunning] = useState(false)
     const [speed, setSpeed] = useState(100)
     const canvasRef = useRef(null)
 
-    const generateNextGrid = useCallback((g) => {
+
+    const generateNextGrid = useCallback((g, rows, cols) => {
         return g.map((row, r) =>
             row.map((cell, c) => {
                 let neighbours = 0;
                 directions.forEach(([x, y]) => {
                     const dx = r + x
                     const dy = c + y
-                    if (0 <= dx && dx < ROWS && 0 <= dy && dy < COLS) {
+                    if (0 <= dx && dx < rows && 0 <= dy && dy < cols) {
                         neighbours += g[dx][dy]
                     }
                 })
@@ -71,11 +79,12 @@ function App() {
         if (!running) return;
 
         const interval = setInterval(() => {
-            setGrid((g) => generateNextGrid(g))
+            const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+            setGrid((g) => generateNextGrid(g, rows, cols));
         }, speed);
 
         return () => clearInterval(interval)
-    }, [running, speed])
+    }, [running, speed, generateNextGrid])
 
     useEffect(() => {
         setRunning(true)
@@ -84,6 +93,7 @@ function App() {
     useEffect(() => {
         const handleKeyDown = (e) => {
             e.preventDefault()
+            const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
             if (e.code === "Space") {
                 toggleSimulation();
             } else if (e.code === "ArrowUp") {
@@ -92,10 +102,10 @@ function App() {
                 setSpeed((prev) => (Math.min(prev + 50, 500)));
             } else if (e.code === "KeyR") {
                 setRunning(false)
-                setGrid(populateGrid())
+                setGrid(populateGrid(rows, cols));
             } else if (e.code === "KeyC") {
                 setRunning(false)
-                setGrid(generateEmptyGrid())
+                setGrid(generateEmptyGrid(rows, cols));
             }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -103,12 +113,34 @@ function App() {
     }, [])
 
     useEffect(() => {
+        const handleResize = () => {
+            setRunning(false)
+            const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+            setGrid((prev) => {
+                const newGrid = generateEmptyGrid(rows, cols);
+                prev.forEach((row, r) => {
+                    row.forEach((cell, c) => {
+                        if (cell && 0 <= c && c < rows && 0 <= r && r < cols) {
+                            newGrid[r][c] = 1
+                        }
+                    })
+                })
+                return newGrid
+            })
+            setRunning(true)
+        }
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [])
+
+    useEffect(() => {
         const canvas = canvasRef.current
         if (!canvas) return;
         const ctx = canvas.getContext('2d')
 
-        canvas.width = COLS * CELL_SIZE
-        canvas.height = ROWS * CELL_SIZE
+        const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+        canvas.width = cols * CELL_SIZE;
+        canvas.height = rows * CELL_SIZE;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -126,14 +158,10 @@ function App() {
 
 
     return (
-        <div style={{textAlign: "center"}}>
+        <div style={{textAlign: "center"}} className="App">
             <canvas
                 ref={canvasRef}
-                width={COLS * CELL_SIZE}
-                height={ROWS * CELL_SIZE}
-                style={{marginTop: 20,}}
             />
-            <div style={{marginTop: 10}}>Speed: {speed}ms</div>
         </div>
     );
 }
