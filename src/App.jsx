@@ -45,6 +45,12 @@ function App() {
         return newGrid
     })
 
+    const randomizeGrid = (rows, cols) => {
+        return Array.from({ length: rows }, () =>
+            Array.from({ length: cols }, () => (Math.random() > 0.7 ? 1 : 0))
+        )
+    }
+
     const [grid, setGrid] = useState(() => {
         const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
         return populateGrid(rows, cols);
@@ -106,6 +112,10 @@ function App() {
             } else if (e.code === "KeyC") {
                 setRunning(false)
                 setGrid(generateEmptyGrid(rows, cols));
+            } else if (e.code === "KeyX") {
+                setRunning(false)
+                setGrid(randomizeGrid(rows, cols))
+                setRunning(true)
             }
         }
         window.addEventListener('keydown', handleKeyDown)
