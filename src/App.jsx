@@ -160,7 +160,8 @@ function App() {
                     ctx.fillStyle = "#ccc"
                     ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 }
-                ctx.strokeStyle = "#333";
+                ctx.strokeStyle = "#444";
+                ctx.lineWidth = 0.5;
                 ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             })
         );
