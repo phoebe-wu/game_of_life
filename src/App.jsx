@@ -1,6 +1,77 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import patterns from "./patterns.json"
 import './App.css'
+import {
+    TbHelpSquareRounded,
+    TbHelpSquareFilled,
+    TbSquareRoundedX,
+    TbSquareRoundedXFilled,
+    TbSpace,
+    TbSquareRoundedArrowUpFilled,
+    TbSquareRoundedArrowDownFilled,
+    TbSquareRoundedLetterRFilled,
+    TbSquareRoundedLetterCFilled,
+    TbSquareRoundedLetterXFilled,
+    TbSquareRoundedLetterIFilled,
+    TbSquareRoundedLetterHFilled
+} from "react-icons/tb";
+
+function Control({icon , text}) {
+    return (
+        <div className="control">
+            <span className="control-icon">{icon}</span>
+            <span className="control-text">{text}</span>
+        </div>
+    );
+}
+
+function HelpModal({onClose}) {
+    const [hover, setHover] = useState(false)
+
+    return (
+        <div className="help-modal">
+            <div className="icon close-modal" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={onClose}>
+                {hover ? <TbSquareRoundedXFilled/> : <TbSquareRoundedX/>}
+            </div>
+            <div className="help-modal-content">
+                <h2> Conway's Game of Life </h2>
+                <p>
+                    Conway’s Game of Life is a zero-player simulation created by mathematician John Conway in 1970. It’s
+                    a fascinating display that shows how simple rules can lead to complex, evolving patterns that look almost
+                    alive.
+
+                    The game takes place on a grid of cells, where each cell is either alive or dead. With each
+                    “generation,” the grid updates automatically based on these rules:
+
+                    <ul>
+                        <li> A live cell with 2 or 3 neighbours survives.</li>
+
+                        <li> A dead cell with exactly 3 neighbours becomes alive (a new cell is “born”).</li>
+
+                        <li> All other cells die or remain empty.</li>
+
+                    </ul>
+
+                    From just a few starting cells, entire colonies can grow, move, or collapse, all without any direct
+                    control from you. It’s like watching a digital ecosystem evolve in real time!
+                </p>
+                <h3> Controls </h3>
+                <div className="controls">
+                    <Control icon = {<TbSpace/>} text = "Play/Pause Simulation"/>
+                    <Control icon = {<TbSquareRoundedLetterRFilled />} text = "Randomize Starting Pattern"/>
+                    <Control icon = {<TbSquareRoundedArrowUpFilled />} text = "Increase Simulation Speed"/>
+                    <Control icon = {<TbSquareRoundedArrowDownFilled />} text = "Decrease Simulation Speed"/>
+                    <Control icon = {<TbSquareRoundedLetterCFilled />} text = "Clear Grid"/>
+                    <Control icon = {<TbSquareRoundedLetterXFilled />} text = "Randomize Whole Grid"/>
+                    <Control icon = {<TbSquareRoundedLetterIFilled />} text = "Show/Hide Info Menu"/>
+                    <Control icon = {<TbSquareRoundedLetterHFilled />} text = "Show/Hide Help Menu"/>
+                </div>
+
+            </div>
+
+        </div>
+    );
+}
 
 function App() {
 
@@ -15,7 +86,7 @@ function App() {
     ]
 
     const generateEmptyGrid = (rows, cols) =>
-        Array.from({ length: rows }, () => Array(cols).fill(0));
+        Array.from({length: rows}, () => Array(cols).fill(0));
 
     const getGridSize = (width, height) => ({
         rows: Math.max(Math.floor(height / CELL_SIZE), MIN_ROWS),
@@ -46,18 +117,22 @@ function App() {
     })
 
     const randomizeGrid = (rows, cols) => {
-        return Array.from({ length: rows }, () =>
-            Array.from({ length: cols }, () => (Math.random() > 0.7 ? 1 : 0))
+        return Array.from({length: rows}, () =>
+            Array.from({length: cols}, () => (Math.random() > 0.7 ? 1 : 0))
         )
     }
 
     const [grid, setGrid] = useState(() => {
-        const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+        const {rows, cols} = getGridSize(window.innerWidth, window.innerHeight);
         return populateGrid(rows, cols);
     });
     const [running, setRunning] = useState(false)
     const [speed, setSpeed] = useState(100)
     const canvasRef = useRef(null)
+
+    const [hover, setHover] = useState(false)
+    const [showHelpModal, setShowHelpModal] = useState(false)
+    // const [showInfoModal, setShowInfoModal] = useState(false)
 
 
     const generateNextGrid = useCallback((g, rows, cols) => {
@@ -81,11 +156,15 @@ function App() {
         setRunning((prev) => !prev);
     }
 
+    const toggleHelpModal = () => {
+        setShowHelpModal((prev) => !prev)
+    }
+
     useEffect(() => {
         if (!running) return;
 
         const interval = setInterval(() => {
-            const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+            const {rows, cols} = getGridSize(window.innerWidth, window.innerHeight);
             setGrid((g) => generateNextGrid(g, rows, cols));
         }, speed);
 
@@ -94,12 +173,12 @@ function App() {
 
     useEffect(() => {
         setRunning(true)
-    },[])
+    }, [])
 
     useEffect(() => {
         const handleKeyDown = (e) => {
             e.preventDefault()
-            const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+            const {rows, cols} = getGridSize(window.innerWidth, window.innerHeight);
             if (e.code === "Space") {
                 toggleSimulation();
             } else if (e.code === "ArrowUp") {
@@ -116,6 +195,8 @@ function App() {
                 setRunning(false)
                 setGrid(randomizeGrid(rows, cols))
                 setRunning(true)
+            } else if (e.code === "KeyH") {
+                toggleHelpModal();
             }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -125,7 +206,7 @@ function App() {
     useEffect(() => {
         const handleResize = () => {
             setRunning(false)
-            const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+            const {rows, cols} = getGridSize(window.innerWidth, window.innerHeight);
             setGrid((prev) => {
                 const newGrid = generateEmptyGrid(rows, cols);
                 prev.forEach((row, r) => {
@@ -148,7 +229,7 @@ function App() {
         if (!canvas) return;
         const ctx = canvas.getContext('2d')
 
-        const { rows, cols } = getGridSize(window.innerWidth, window.innerHeight);
+        const {rows, cols} = getGridSize(window.innerWidth, window.innerHeight);
         canvas.width = cols * CELL_SIZE;
         canvas.height = rows * CELL_SIZE;
 
@@ -170,9 +251,12 @@ function App() {
 
     return (
         <div style={{textAlign: "center"}} className="App">
-            <canvas
-                ref={canvasRef}
-            />
+            <div className="icon help-icon" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+                 onClick={toggleHelpModal}>
+                {hover ? <TbHelpSquareFilled/> : <TbHelpSquareRounded/>}
+            </div>
+            {showHelpModal && <HelpModal onClose={toggleHelpModal}/>}
+            <canvas ref={canvasRef}/>
         </div>
     );
 }
