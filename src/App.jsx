@@ -116,11 +116,25 @@ function HelpModal({onClose}) {
     );
 }
 
+function InfoModal({generation, live, name}) {
+    return (
+        <div className="info-modal">
+            <p><strong> pattern: {name}</strong></p>
+            <p><strong> generation: {generation}</strong></p>
+            <p><strong> live cells: {live}</strong></p>
+        </div>
+    )
+}
+
 function App() {
 
     const MIN_ROWS = 20
     const MIN_COLS = 20
     const CELL_SIZE = 15
+
+    const [currentPattern, setCurrentPattern] = useState("")
+    const [generation, setGeneration] = useState(1)
+    const [live, setLive] = useState(0)
 
     const directions = [
         [-1, -1], [-1, 0], [-1, 1],
@@ -139,6 +153,7 @@ function App() {
     const populateGrid = ((rows, cols) => {
         const patternKeys = Object.keys(patterns)
         const patternName = patternKeys[Math.floor(Math.random() * patternKeys.length)]
+        setCurrentPattern(patternName)
 
         console.log(patternName)
         const pattern = patterns[patternName]
@@ -160,6 +175,7 @@ function App() {
     })
 
     const randomizeGrid = (rows, cols) => {
+        setCurrentPattern("random")
         return Array.from({length: rows}, () =>
             Array.from({length: cols}, () => (Math.random() > 0.7 ? 1 : 0))
         )
@@ -175,11 +191,14 @@ function App() {
 
     const [hover, setHover] = useState(false)
     const [showHelpModal, setShowHelpModal] = useState(false)
-    // const [showInfoModal, setShowInfoModal] = useState(false)
-
+    const [showInfoModal, setShowInfoModal] = useState(true)
 
     const generateNextGrid = useCallback((g, rows, cols) => {
-        return g.map((row, r) =>
+
+        let alive = 0
+        let changed = false;
+
+        const newGrid =  g.map((row, r) =>
             row.map((cell, c) => {
                 let neighbours = 0;
                 directions.forEach(([x, y]) => {
@@ -189,10 +208,16 @@ function App() {
                         neighbours += g[dx][dy]
                     }
                 })
-                if (cell === 1 && (neighbours < 2 || neighbours > 3)) return 0
-                if (cell === 0 && neighbours === 3) return 1
-                return cell
+                let newCell = cell;
+                if (cell === 1 && (neighbours < 2 || neighbours > 3)) newCell = 0
+                if (cell === 0 && neighbours === 3) newCell = 1
+
+                if (newCell !== cell) changed = true;
+                if (newCell) alive++;
+
+                return newCell
             }))
+        return {newGrid, alive, changed}
     }, [directions])
 
     const toggleSimulation = () => {
@@ -203,12 +228,28 @@ function App() {
         setShowHelpModal((prev) => !prev)
     }
 
+    const toggleInfoModal = () => {
+        setShowInfoModal((prev) => !prev)
+    }
+
+    const resetStats = () => {
+        setGeneration(1);
+        setLive(0);
+    }
+
     useEffect(() => {
         if (!running) return;
 
         const interval = setInterval(() => {
             const {rows, cols} = getGridSize(window.innerWidth, window.innerHeight);
-            setGrid((g) => generateNextGrid(g, rows, cols));
+            setGrid((g) => {
+                const {newGrid, alive, changed} = generateNextGrid(g, rows, cols);
+
+                setLive(alive);
+                if (changed) setGeneration((prev) => prev + 1);
+
+                return newGrid;
+            });
         }, speed);
 
         return () => clearInterval(interval)
@@ -230,16 +271,21 @@ function App() {
                 setSpeed((prev) => (Math.min(prev + 50, 500)));
             } else if (e.code === "KeyR") {
                 setRunning(false)
+                resetStats();
                 setGrid(populateGrid(rows, cols));
             } else if (e.code === "KeyC") {
                 setRunning(false)
+                resetStats();
                 setGrid(generateEmptyGrid(rows, cols));
             } else if (e.code === "KeyX") {
                 setRunning(false)
+                resetStats();
                 setGrid(randomizeGrid(rows, cols))
                 setRunning(true)
             } else if (e.code === "KeyH") {
                 toggleHelpModal();
+            } else if (e.code === "KeyI") {
+                toggleInfoModal();
             }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -299,6 +345,7 @@ function App() {
                 {hover ? <TbHelpSquareFilled/> : <TbHelpSquareRounded/>}
             </div>
             {showHelpModal && <HelpModal onClose={toggleHelpModal}/>}
+            {showInfoModal && <InfoModal generation={generation} live={live} name={currentPattern}/>}
             <canvas ref={canvasRef}/>
         </div>
     );

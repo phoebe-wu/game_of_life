@@ -23,7 +23,7 @@ canvas {
     transform: translate(-50%, -50%);
     z-index: 1000;
 
-    background: #222;
+    background-color:rgba(34, 34, 34, 0.95);
     padding: 2rem;
     border-radius: 25px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
@@ -35,7 +35,7 @@ canvas {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     width: 90px;
-    margin: 10px auto;
+    margin: 20px auto;
 }
 
 .small-grid span {
@@ -46,16 +46,19 @@ canvas {
     aspect-ratio: 1;
     background-color: #333;
     font-family: monospace;
+    transition: background-color 0.3s ease;
 }
 
 .small-grid span.alive {
     background-color: #ccc;
-    border: 1px solid #333;
+    border: 1px solid #444;
 }
 
 .rules {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    margin: 0 auto 20px auto;
+    gap: 20px;
 }
 
 .control-container {
@@ -80,4 +83,22 @@ canvas {
     color: #ccc;
     display: flex;
     align-items: center;
+}
+
+.info-modal {
+    position: fixed;
+    z-index: 999;
+    bottom: 10px;
+    right: 15px;
+    color: #ccc;
+    background-color:rgba(34, 34, 34, 0.95);
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+
+    font-family: monospace;
+    border-radius: 10px;
+    padding: 5px 10px;
+}
+
+.info-modal p {
+    font-size: 1rem;
 }
