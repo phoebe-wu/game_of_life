@@ -16,7 +16,27 @@ import {
     TbSquareRoundedLetterHFilled
 } from "react-icons/tb";
 
-function Control({icon , text}) {
+function CellAnimation({states}) {
+    const [current, setCurrent] = useState(0)
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrent((prev) => (prev + 1) % states.length)
+        }, 999)
+
+        return () => clearInterval(timer)
+    }, [states])
+
+    return (
+        <div className="small-grid">
+            {states[current].map((cell, i) => (
+                <span key={i} className={cell ? "alive" : "dead"}> </span>
+            ))}
+        </div>
+    )
+}
+
+function Control({icon, text}) {
     return (
         <div className="control">
             <span className="control-icon">{icon}</span>
@@ -30,41 +50,64 @@ function HelpModal({onClose}) {
 
     return (
         <div className="help-modal">
-            <div className="icon close-modal" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={onClose}>
+            <div className="icon close-modal" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+                 onClick={onClose}>
                 {hover ? <TbSquareRoundedXFilled/> : <TbSquareRoundedX/>}
             </div>
             <div className="help-modal-content">
                 <h2> Conway's Game of Life </h2>
                 <p>
                     Conway’s Game of Life is a zero-player simulation created by mathematician John Conway in 1970. It’s
-                    a fascinating display that shows how simple rules can lead to complex, evolving patterns that look almost
+                    a fascinating display that shows how simple rules can lead to complex, evolving patterns that look
+                    almost
                     alive.
 
                     The game takes place on a grid of cells, where each cell is either alive or dead. With each
                     “generation,” the grid updates automatically based on these rules:
 
-                    <ul>
-                        <li> A live cell with 2 or 3 neighbours survives.</li>
+                    <div className="small-grid">
+                        <span> 1 </span> <span> 2 </span> <span> 3 </span>
+                        <span> 4 </span> <span className="alive">   </span> <span> 5 </span>
+                        <span> 6 </span> <span> 7 </span> <span> 8 </span>
+                    </div>
+                    <sub> Each cell has 8 neighbours. </sub>
 
-                        <li> A dead cell with exactly 3 neighbours becomes alive (a new cell is “born”).</li>
+                    <div className="rules">
+                        <div>
+                            <CellAnimation states={[[1, 0, 0, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0, 0]]}/>
+                            <sub> A live cell with fewer than 2 live neighbours dies, through underpopulation.</sub>
+                        </div>
+                        <div>
+                            <CellAnimation states={[[1, 0, 0, 0, 1, 1, 0, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1]]}/>
+                            <sub> A live cell with more than 3 live neighbours dies, through overpopulation.</sub>
+                        </div>
 
-                        <li> All other cells die or remain empty.</li>
+                        <div>
+                            <CellAnimation states={[[1, 0, 0, 0, 0, 1, 1, 0, 0], [1, 0, 0, 0, 1, 1, 1, 0, 0]]}/>
+                            <sub> A dead cell with exactly 3 live neighbours comes alive, through reproduction.</sub>
+                        </div>
 
-                    </ul>
+                        <div>
+                            <CellAnimation states={[[1, 0, 1, 0, 1, 0, 1, 0, 0], [1, 0, 1, 0, 1, 0, 1, 0, 0]]}/>
+                            <sub> A live cell with 2 or 3 live neighbours remains the same.</sub>
+                        </div>
+                    </div>
 
                     From just a few starting cells, entire colonies can grow, move, or collapse, all without any direct
                     control from you. It’s like watching a digital ecosystem evolve in real time!
                 </p>
                 <h3> Controls </h3>
-                <div className="controls">
-                    <Control icon = {<TbSpace/>} text = "Play/Pause Simulation"/>
-                    <Control icon = {<TbSquareRoundedLetterRFilled />} text = "Randomize Starting Pattern"/>
-                    <Control icon = {<TbSquareRoundedArrowUpFilled />} text = "Increase Simulation Speed"/>
-                    <Control icon = {<TbSquareRoundedArrowDownFilled />} text = "Decrease Simulation Speed"/>
-                    <Control icon = {<TbSquareRoundedLetterCFilled />} text = "Clear Grid"/>
-                    <Control icon = {<TbSquareRoundedLetterXFilled />} text = "Randomize Whole Grid"/>
-                    <Control icon = {<TbSquareRoundedLetterIFilled />} text = "Show/Hide Info Menu"/>
-                    <Control icon = {<TbSquareRoundedLetterHFilled />} text = "Show/Hide Help Menu"/>
+                <div className="control-container">
+                    <div className="controls">
+                        <Control icon={<TbSpace/>} text="Play/Pause Simulation"/>
+                        <Control icon={<TbSquareRoundedLetterRFilled/>} text="Randomize Starting Pattern"/>
+                        <Control icon={<TbSquareRoundedArrowUpFilled/>} text="Increase Simulation Speed"/>
+                        <Control icon={<TbSquareRoundedArrowDownFilled/>} text="Decrease Simulation Speed"/>
+                        <Control icon={<TbSquareRoundedLetterCFilled/>} text="Clear Grid"/>
+                        <Control icon={<TbSquareRoundedLetterXFilled/>} text="Randomize Whole Grid"/>
+                        <Control icon={<TbSquareRoundedLetterIFilled/>} text="Show/Hide Info Menu"/>
+                        <Control icon={<TbSquareRoundedLetterHFilled/>} text="Show/Hide Help Menu"/>
+                    </div>
                 </div>
 
             </div>

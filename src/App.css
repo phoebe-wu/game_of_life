@@ -27,12 +27,46 @@ canvas {
     padding: 2rem;
     border-radius: 25px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
+
+    color: #ccc;
+}
+
+.small-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 90px;
+    margin: 10px auto;
+}
+
+.small-grid span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+    aspect-ratio: 1;
+    background-color: #333;
+    font-family: monospace;
+}
+
+.small-grid span.alive {
+    background-color: #ccc;
+    border: 1px solid #333;
+}
+
+.rules {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.control-container {
+    display: flex;
+    justify-content: center;
 }
 
 .controls {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 10px 50px;
 }
 
 .control {
