@@ -1,5 +1,12 @@
+@font-face {
+  font-family: "Dogicapixel";
+  src: url("/public/fonts/dogicapixel.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
-  font-family: system-ui, monospace, sans-serif;
+  font-family: "Dogicapixel", monospace;
   line-height: 1.5;
   font-weight: 400;
 
@@ -31,7 +38,7 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 2.2rem;
   line-height: 1.1;
 }
 
@@ -52,6 +59,37 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+p {
+  font-size: 0.85rem;
+}
+span {
+  font-size: 0.80rem;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #222;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #222;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }
 
 @media (prefers-color-scheme: light) {

@@ -55,7 +55,7 @@ function HelpModal({onClose}) {
                 {hover ? <TbSquareRoundedXFilled/> : <TbSquareRoundedX/>}
             </div>
             <div className="help-modal-content">
-                <h2> Conway's Game of Life </h2>
+                <h1><strong>Conway's Game of Life </strong></h1>
                 <p>
                     Conway’s Game of Life is a zero-player simulation created by mathematician John Conway in 1970. It’s
                     a fascinating display that shows how simple rules can lead to complex, evolving patterns that look

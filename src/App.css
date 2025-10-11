@@ -31,10 +31,11 @@ canvas {
     color: #ccc;
 
     width: 90%;
-    max-width: 1000px;
+    max-width: 1500px;
+    min-width: 650px;
     box-sizing: border-box;
     overflow-y: auto;
-    max-height: 90vh;
+    max-height: 85vh;
 }
 
 .small-grid {
@@ -51,7 +52,6 @@ canvas {
     border: 1px solid #ccc;
     aspect-ratio: 1;
     background-color: #333;
-    font-family: monospace;
     transition: background-color 0.3s ease;
 }
 
@@ -100,7 +100,6 @@ canvas {
     background-color:rgba(34, 34, 34, 0.95);
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
 
-    font-family: monospace;
     border-radius: 10px;
     padding: 5px 10px;
 
@@ -111,5 +110,5 @@ canvas {
 }
 
 .info-modal p {
-    font-size: 0.85rem;
+    font-size: 0.65rem;
 }
